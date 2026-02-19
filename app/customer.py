@@ -62,11 +62,7 @@ class Customer:
         return cheapest_shop, cheapest_cost
 
     def perform_purchase_trip(self, shop: Shop, total_cost: float) -> None:
-        """
-        Perform the trip: go to shop, print receipt, pay, return home.
 
-        Rule: when arriving at the shop, customer's location equals shop location.
-        """
         home_location = self.location
 
         self.location = shop.location
