@@ -99,4 +99,6 @@ def shop_trip() -> None:
         print(f"{customer.name} rides to {best_shop.name}")
         customer.perform_purchase_trip(best_shop, best_cost)
         print(f"{customer.name} rides home")
-        print(f"{customer.name} now has {money_fmt(customer.money)} dollars\n")
+        print(
+            f"{customer.name} now has {money_fmt(customer.money)} dollars\n"
+        )

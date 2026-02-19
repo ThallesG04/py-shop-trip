@@ -10,7 +10,11 @@ class Car:
     brand: str
     fuel_consumption: float  # liters per 100 km
 
-    def fuel_cost_for_distance(self, distance_km: float, fuel_price: float) -> float:
+    def fuel_cost_for_distance(
+        self,
+        distance_km: float,
+        fuel_price: float,
+    ) -> float:
         """
         Return the fuel cost to drive the given distance.
 

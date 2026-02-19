@@ -18,7 +18,11 @@ class Customer:
     money: float
     car: Car
 
-    def trip_cost_to_shop(self, shop: Shop, fuel_price: float) -> Optional[float]:
+    def trip_cost_to_shop(
+        self,
+        shop: Shop,
+        fuel_price: float,
+    ) -> Optional[float]:
         """
         Calculate total trip cost to a shop.
 
@@ -29,7 +33,10 @@ class Customer:
             return None
 
         distance_one_way = euclidean_distance_km(self.location, shop.location)
-        fuel_one_way = self.car.fuel_cost_for_distance(distance_one_way, fuel_price)
+        fuel_one_way = self.car.fuel_cost_for_distance(
+            distance_one_way,
+            fuel_price,
+        )
         products_cost = shop.cart_cost(self.product_cart)
         total_cost = (2.0 * fuel_one_way) + products_cost
         return total_cost
