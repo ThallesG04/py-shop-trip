@@ -14,12 +14,7 @@ def project_root() -> Path:
 
 
 def resolve_config_path(filename: str = "config.json") -> Path:
-    """
-    Find config.json in common locations.
-
-    The test usually expects it in the project root, but some templates
-    place it elsewhere.
-    """
+    """Find config.json in common locations."""
     root_folder = project_root()
 
     candidates = (
@@ -65,5 +60,19 @@ def euclidean_distance_km(point_a: Location, point_b: Location) -> float:
 
 
 def money_fmt(value: float) -> str:
-    """Format a float value with 2 decimals for printing."""
+    """Format money with 2 decimals (used for trip costs and final balance)."""
     return f"{value:.2f}"
+
+
+def money_trim(value: float) -> str:
+    """
+    Format money without trailing zeros.
+
+    Examples:
+    55.0 -> "55"
+    12.5 -> "12.5"
+    26.50 -> "26.5"
+    """
+    text = f"{value:.2f}"
+    text = text.rstrip("0").rstrip(".")
+    return text
