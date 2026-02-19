@@ -1,3 +1,106 @@
-def shop_trip():
-    # write your code here
-    pass
+from __future__ import annotations
+
+from typing import Dict, List, Tuple
+
+from .car import Car
+from .customer import Customer
+from .shop import Shop
+from .utils import load_config, money_fmt, to_location
+
+
+def shop_trip() -> None:
+    """
+    Função principal exigida pelo enunciado.
+    NÃO recebe argumentos.
+
+    Responsabilidades:
+    - Ler config.json
+    - Montar objetos Customer/Shop/Car
+    - Para cada cliente:
+        * imprimir custos por loja
+        * escolher a loja mais barata
+        * executar compra se houver dinheiro suficiente
+    """
+    config = load_config("config.json")
+    fuel_price: float = float(config["FUEL_PRICE"])
+
+    shops: List[Shop] = []
+    for raw_shop in config["shops"]:
+        shop = Shop(
+            name=str(raw_shop["name"]),
+            location=to_location(raw_shop["location"]),
+            products={
+                str(k): float(v)
+                for k, v in raw_shop["products"].items()
+            },
+        )
+        shops.append(shop)
+    shops_tuple: Tuple[Shop, ...] = tuple(shops)
+
+    customers: List[Customer] = []
+    for raw_customer in config["customers"]:
+        car_data = raw_customer["car"]
+        car = Car(
+            brand=str(car_data["brand"]),
+            fuel_consumption=float(car_data["fuel_consumption"]),
+        )
+
+        customer = Customer(
+            name=str(raw_customer["name"]),
+            product_cart={
+                str(k): int(v)
+                for k, v in raw_customer["product_cart"].items()
+            },
+            location=to_location(raw_customer["location"]),
+            money=float(raw_customer["money"]),
+            car=car,
+        )
+        customers.append(customer)
+
+    for customer in customers:
+        print(f"{customer.name} has {money_fmt(customer.money)} dollars")
+
+        costs_by_shop: Dict[str, float] = {}
+        for shop in shops_tuple:
+            cost = customer.trip_cost_to_shop(shop, fuel_price)
+
+            # Loja inválida (não atende todos os produtos do carrinho).
+            if cost is None:
+                continue
+
+            costs_by_shop[shop.name] = cost
+            print(
+                f"{customer.name}'s trip to the {shop.name} costs "
+                f"{money_fmt(cost)}"
+            )
+
+        if not costs_by_shop:
+            print(
+                f"{customer.name} doesn't have enough money to make a purchase "
+                "in any shop"
+            )
+            continue
+
+        best_shop, best_cost = customer.choose_cheapest_shop(
+            shops_tuple,
+            fuel_price,
+        )
+
+        if best_shop is None or best_cost is None:
+            print(
+                f"{customer.name} doesn't have enough money to make a purchase "
+                "in any shop"
+            )
+            continue
+
+        if customer.money < best_cost:
+            print(
+                f"{customer.name} doesn't have enough money to make a purchase "
+                "in any shop"
+            )
+            continue
+
+        print(f"{customer.name} rides to {best_shop.name}")
+        customer.perform_purchase_trip(best_shop, best_cost)
+        print(f"{customer.name} rides home")
+        print(f"{customer.name} now has {money_fmt(customer.money)} dollars\n")
