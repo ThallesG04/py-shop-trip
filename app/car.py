@@ -16,10 +16,9 @@ class Car:
         fuel_price: float,
     ) -> float:
         """
-        Return the fuel cost to drive the given distance.
+       Return the fuel cost to drive a given distance.
 
-        liters_spent = distance_km * (fuel_consumption / 100)
-        cost = liters_spent * fuel_price
+        The fuel consumption is measured in liters per 100 km.
         """
         liters_spent: float = distance_km * (self.fuel_consumption / 100.0)
         return liters_spent * fuel_price
