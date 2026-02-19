@@ -10,31 +10,28 @@ from .utils import load_config, money_fmt, to_location
 
 def shop_trip() -> None:
     """
-    Função principal exigida pelo enunciado.
-    NÃO recebe argumentos.
+    Required main function. Takes no arguments.
 
-    Responsabilidades:
-    - Ler config.json
-    - Montar objetos Customer/Shop/Car
-    - Para cada cliente:
-        * imprimir custos por loja
-        * escolher a loja mais barata
-        * executar compra se houver dinheiro suficiente
+    - Loads config.json
+    - Builds Shop/Customer/Car objects
+    - For each customer prints trip cost to each shop
+    - Chooses cheapest shop and performs purchase if possible
     """
     config = load_config("config.json")
     fuel_price: float = float(config["FUEL_PRICE"])
 
     shops: List[Shop] = []
     for raw_shop in config["shops"]:
-        shop = Shop(
-            name=str(raw_shop["name"]),
-            location=to_location(raw_shop["location"]),
-            products={
-                str(k): float(v)
-                for k, v in raw_shop["products"].items()
-            },
+        shops.append(
+            Shop(
+                name=str(raw_shop["name"]),
+                location=to_location(raw_shop["location"]),
+                products={
+                    str(key): float(value)
+                    for key, value in raw_shop["products"].items()
+                },
+            )
         )
-        shops.append(shop)
     shops_tuple: Tuple[Shop, ...] = tuple(shops)
 
     customers: List[Customer] = []
@@ -45,33 +42,32 @@ def shop_trip() -> None:
             fuel_consumption=float(car_data["fuel_consumption"]),
         )
 
-        customer = Customer(
-            name=str(raw_customer["name"]),
-            product_cart={
-                str(k): int(v)
-                for k, v in raw_customer["product_cart"].items()
-            },
-            location=to_location(raw_customer["location"]),
-            money=float(raw_customer["money"]),
-            car=car,
+        customers.append(
+            Customer(
+                name=str(raw_customer["name"]),
+                product_cart={
+                    str(key): int(value)
+                    for key, value in raw_customer["product_cart"].items()
+                },
+                location=to_location(raw_customer["location"]),
+                money=float(raw_customer["money"]),
+                car=car,
+            )
         )
-        customers.append(customer)
 
     for customer in customers:
         print(f"{customer.name} has {money_fmt(customer.money)} dollars")
 
         costs_by_shop: Dict[str, float] = {}
         for shop in shops_tuple:
-            cost = customer.trip_cost_to_shop(shop, fuel_price)
-
-            # Loja inválida (não atende todos os produtos do carrinho).
-            if cost is None:
+            trip_cost = customer.trip_cost_to_shop(shop, fuel_price)
+            if trip_cost is None:
                 continue
 
-            costs_by_shop[shop.name] = cost
+            costs_by_shop[shop.name] = trip_cost
             print(
                 f"{customer.name}'s trip to the {shop.name} costs "
-                f"{money_fmt(cost)}"
+                f"{money_fmt(trip_cost)}"
             )
 
         if not costs_by_shop:

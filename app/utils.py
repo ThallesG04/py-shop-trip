@@ -9,61 +9,61 @@ Location = Tuple[float, float]
 
 
 def project_root() -> Path:
-    """Return the project root (folder that contains the 'app' directory)."""
+    """Return the project root folder (the one containing the 'app' folder)."""
     return Path(__file__).resolve().parent.parent
 
 
 def resolve_config_path(filename: str = "config.json") -> Path:
     """
-    Try to find the config file in common locations.
+    Find config.json in common locations.
 
-    The tests usually expect `config.json` in the project root, but on some
-    templates it might be inside other folders. We search a few safe places.
+    The test usually expects it in the project root, but some templates
+    place it elsewhere.
     """
-    root = project_root()
+    root_folder = project_root()
 
     candidates = (
         Path.cwd() / filename,
-        root / filename,
-        root / "app" / filename,
-        root / "configs" / filename,
-        root / "config" / filename,
-        root / "data" / filename,
+        root_folder / filename,
+        root_folder / "app" / filename,
+        root_folder / "configs" / filename,
+        root_folder / "config" / filename,
+        root_folder / "data" / filename,
     )
 
-    for path in candidates:
-        if path.exists():
-            return path
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
 
+    searched = ", ".join(str(path) for path in candidates)
     raise FileNotFoundError(
-        f"Could not find '{filename}'. Looked in: "
-        + ", ".join(str(p) for p in candidates)
+        f"Could not find '{filename}'. Looked in: {searched}"
     )
 
 
 def load_config(filename: str = "config.json") -> Dict[str, Any]:
-    """Load the JSON config file and return it as a dict."""
+    """Load JSON configuration from disk."""
     config_path = resolve_config_path(filename)
     with config_path.open("r", encoding="utf-8") as file:
         return json.load(file)
 
 
 def to_location(raw: List[float]) -> Location:
-    """Convert [x, y] list from JSON into a typed (x, y) tuple."""
+    """Convert [x, y] list into a typed (x, y) tuple."""
     if len(raw) != 2:
-        raise ValueError("Location must have exactly 2 values: [x, y].")
+        raise ValueError("Location must contain exactly 2 numeric values.")
 
-    x, y = raw
-    return float(x), float(y)
+    x_coord, y_coord = raw
+    return float(x_coord), float(y_coord)
 
 
-def euclidean_distance_km(a: Location, b: Location) -> float:
+def euclidean_distance_km(point_a: Location, point_b: Location) -> float:
     """Compute Euclidean distance between two 2D points."""
-    dx = a[0] - b[0]
-    dy = a[1] - b[1]
-    return math.sqrt(dx * dx + dy * dy)
+    delta_x = point_a[0] - point_b[0]
+    delta_y = point_a[1] - point_b[1]
+    return math.sqrt(delta_x * delta_x + delta_y * delta_y)
 
 
 def money_fmt(value: float) -> str:
-    """Format money with 2 decimals for printing (as required by the task)."""
+    """Format a float value with 2 decimals for printing."""
     return f"{value:.2f}"

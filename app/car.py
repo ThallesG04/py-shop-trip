@@ -1,18 +1,21 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class Car:
-    # Representa o carro do cliente
-    brand: str
-    fuel_consumption: float
+    """Car model used to calculate fuel costs."""
 
-    def fuel_cost_for_distance(
-            self,
-            distance_km: float,
-            fuel_price: float,
-) -> float:
-        liters_spent = distance_km * (self.fuel_consumption / 100.0)
+    brand: str
+    fuel_consumption: float  # liters per 100 km
+
+    def fuel_cost_for_distance(self, distance_km: float, fuel_price: float) -> float:
+        """
+        Return the fuel cost to drive the given distance.
+
+        liters_spent = distance_km * (fuel_consumption / 100)
+        cost = liters_spent * fuel_price
+        """
+        liters_spent: float = distance_km * (self.fuel_consumption / 100.0)
         return liters_spent * fuel_price
-    # Calcula gasto de combustível para percorrer uma distância
