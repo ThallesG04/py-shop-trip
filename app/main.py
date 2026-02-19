@@ -13,40 +13,52 @@ def shop_trip() -> None:
     config = load_config("config.json")
     fuel_price: float = float(config["FUEL_PRICE"])
 
-    shops_list: List[Shop] = []
+    shop_list: List[Shop] = []
+
     for raw_shop in config["shops"]:
-        products = {
+        products_map = {
             str(key): float(value)
             for key, value in raw_shop["products"].items()
         }
-        shops_list.append(
+
+        shop_list.append(
             Shop(
                 name=str(raw_shop["name"]),
-                location=to_location(raw_shop["location"]),
-                products=products,
+                location=to_location(
+                    raw_shop["location"]
+                ),
+                products=products_map,
             )
         )
 
-    shops: Tuple[Shop, ...] = tuple(shops_list)
+    shops: Tuple[Shop, ...] = tuple(shop_list)
 
     customers: List[Customer] = []
+
     for raw_customer in config["customers"]:
         car_data = raw_customer["car"]
+
         car = Car(
             brand=str(car_data["brand"]),
-            fuel_consumption=float(car_data["fuel_consumption"]),
+            fuel_consumption=float(
+                car_data["fuel_consumption"]
+            ),
         )
 
-        cart = {
+        cart_map = {
             str(key): int(value)
-            for key, value in raw_customer["product_cart"].items()
+            for key, value in raw_customer[
+                "product_cart"
+            ].items()
         }
 
         customers.append(
             Customer(
                 name=str(raw_customer["name"]),
-                product_cart=cart,
-                location=to_location(raw_customer["location"]),
+                product_cart=cart_map,
+                location=to_location(
+                    raw_customer["location"]
+                ),
                 money=float(raw_customer["money"]),
                 car=car,
             )
@@ -61,46 +73,69 @@ def shop_trip() -> None:
         costs: Dict[str, float] = {}
 
         for shop in shops:
-            trip_cost = customer.trip_cost_to_shop(shop, fuel_price)
+            trip_cost = customer.trip_cost_to_shop(
+                shop,
+                fuel_price,
+            )
+
             if trip_cost is None:
                 continue
 
             costs[shop.name] = trip_cost
+
             print(
-                f"{customer.name}'s trip to the {shop.name} costs "
+                f"{customer.name}'s trip to the "
+                f"{shop.name} costs "
                 f"{money_fmt(trip_cost)}"
             )
 
         if not costs:
             print(
-                f"{customer.name} doesn't have enough money to make a purchase "
-                "in any shop"
+                f"{customer.name} doesn't have "
+                "enough money to make a "
+                "purchase in any shop"
             )
             continue
 
-        best_shop, best_cost = customer.choose_cheapest_shop(
-            shops,
-            fuel_price,
+        best_shop, best_cost = (
+            customer.choose_cheapest_shop(
+                shops,
+                fuel_price,
+            )
         )
 
         if best_shop is None or best_cost is None:
             print(
-                f"{customer.name} doesn't have enough money to make a purchase "
-                "in any shop"
+                f"{customer.name} doesn't have "
+                "enough money to make a "
+                "purchase in any shop"
             )
             continue
 
         if customer.money < best_cost:
             print(
-                f"{customer.name} doesn't have enough money to make a purchase "
-                "in any shop"
+                f"{customer.name} doesn't have "
+                "enough money to make a "
+                "purchase in any shop"
             )
             continue
 
-        print(f"{customer.name} rides to {best_shop.name}")
-        customer.perform_purchase_trip(best_shop, best_cost)
-        print(f"{customer.name} rides home")
+        print(
+            f"{customer.name} rides to "
+            f"{best_shop.name}"
+        )
+
+        customer.perform_purchase_trip(
+            best_shop,
+            best_cost,
+        )
+
+        print(
+            f"{customer.name} rides home"
+        )
+
         print(
             f"{customer.name} now has "
-            f"{money_fmt(customer.money)} dollars\n"
+            f"{money_fmt(customer.money)} "
+            "dollars\n"
         )
